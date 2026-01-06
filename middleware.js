@@ -92,8 +92,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks(.*)',
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  const { userId } = auth();
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
   
   // If user is not signed in and trying to access a protected route
   if (!userId && !isPublicRoute(req)) {
