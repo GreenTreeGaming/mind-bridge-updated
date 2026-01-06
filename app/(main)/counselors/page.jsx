@@ -263,14 +263,24 @@ export default function CounselorsPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground text-lg mb-1 truncate">
+                        <h3 className="font-semibold text-foreground text-lg mb-1 break-words leading-snug">
                           {counselor.name || "Counselor"}
                         </h3>
 
                         {counselor.specialty && (
                           <Badge
                             variant="outline"
-                            className="bg-primary/10 border-primary/20 text-primary w-fit text-xs"
+                            className="
+    bg-primary/10
+    border-primary/20
+    text-primary
+    text-xs
+    max-w-full
+    whitespace-normal
+    break-words
+    leading-tight
+    inline-flex
+  "
                           >
                             {counselor.specialty}
                           </Badge>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -23,30 +23,17 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { updateDoctorStatus } from "@/actions/admin";
 import useFetch from "@/hooks/use-fetch";
-import { useEffect } from "react";
 import { BarLoader } from "react-spinners";
 
 export function PendingDoctors({ doctors }) {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
-  // Custom hook for approve/reject server action
-  const {
-    loading,
-    data,
-    fn: submitStatusUpdate,
-  } = useFetch(updateDoctorStatus);
+  const { loading, data, fn: submitStatusUpdate } =
+    useFetch(updateDoctorStatus);
 
-  // Open doctor details dialog
-  const handleViewDetails = (doctor) => {
-    setSelectedDoctor(doctor);
-  };
+  const handleViewDetails = (doctor) => setSelectedDoctor(doctor);
+  const handleCloseDialog = () => setSelectedDoctor(null);
 
-  // Close doctor details dialog
-  const handleCloseDialog = () => {
-    setSelectedDoctor(null);
-  };
-
-  // Handle approve or reject doctor
   const handleUpdateStatus = async (doctorId, status) => {
     if (loading) return;
 
@@ -58,22 +45,21 @@ export function PendingDoctors({ doctors }) {
   };
 
   useEffect(() => {
-    if (data && data?.success) {
-      handleCloseDialog();
-    }
+    if (data?.success) handleCloseDialog();
   }, [data]);
 
   return (
     <div>
-      <Card className="bg-muted/20 border-emerald-900/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-white">
+          <CardTitle className="text-xl font-bold text-foreground">
             Pending Counselor Verifications
           </CardTitle>
           <CardDescription>
             Review and approve counselor applications
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {doctors.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -84,16 +70,16 @@ export function PendingDoctors({ doctors }) {
               {doctors.map((doctor) => (
                 <Card
                   key={doctor.id}
-                  className="bg-background border-emerald-900/20 hover:border-emerald-700/30 transition-all"
+                  className="bg-card border-border transition-colors hover:border-primary/30"
                 >
                   <CardContent className="p-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="bg-muted/20 rounded-full p-2">
-                          <User className="h-5 w-5 text-emerald-400" />
+                        <div className="rounded-full bg-muted p-2">
+                          <User className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-white">
+                          <h3 className="font-medium text-foreground">
                             {doctor.name}
                           </h3>
                           <p className="text-sm text-muted-foreground">
@@ -102,18 +88,15 @@ export function PendingDoctors({ doctors }) {
                           </p>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-2 self-end md:self-auto">
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-900/20 border-amber-900/30 text-amber-400"
-                        >
+                        <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
                           Pending
                         </Badge>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewDetails(doctor)}
-                          className="border-emerald-900/30 hover:bg-muted/80"
                         >
                           View Details
                         </Button>
@@ -127,12 +110,12 @@ export function PendingDoctors({ doctors }) {
         </CardContent>
       </Card>
 
-      {/* Doctor Details Dialog */}
+      {/* Dialog */}
       {selectedDoctor && (
-        <Dialog open={!!selectedDoctor} onOpenChange={handleCloseDialog}>
+        <Dialog open onOpenChange={handleCloseDialog}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-white">
+              <DialogTitle className="text-xl font-bold text-foreground">
                 Counselor Verification Details
               </DialogTitle>
               <DialogDescription>
@@ -142,88 +125,70 @@ export function PendingDoctors({ doctors }) {
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* Basic Info */}
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="space-y-1 flex-1">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Full Name
-                  </h4>
-                  <p className="text-base font-medium text-white">
-                    {selectedDoctor.name}
-                  </p>
-                </div>
-                <div className="space-y-1 flex-1">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Email
-                  </h4>
-                  <p className="text-base font-medium text-white">
-                    {selectedDoctor.email}
-                  </p>
-                </div>
-                <div className="space-y-1 flex-1">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Application Date
-                  </h4>
-                  <p className="text-base font-medium text-white">
-                    {format(new Date(selectedDoctor.createdAt), "PPP")}
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  ["Full Name", selectedDoctor.name],
+                  ["Email", selectedDoctor.email],
+                  [
+                    "Application Date",
+                    format(new Date(selectedDoctor.createdAt), "PPP"),
+                  ],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <p className="text-sm text-muted-foreground">{label}</p>
+                    <p className="font-medium text-foreground">{value}</p>
+                  </div>
+                ))}
               </div>
 
-              <Separator className="bg-emerald-900/20" />
+              <Separator />
 
-              {/* Professional Details */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Medal className="h-5 w-5 text-emerald-400" />
-                  <h3 className="text-white font-medium">
+                  <Medal className="h-5 w-5 text-primary" />
+                  <h3 className="font-medium text-foreground">
                     Professional Information
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Specialty
-                    </h4>
-                    <p className="text-white">{selectedDoctor.specialty}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Specialty</p>
+                    <p className="text-foreground">
+                      {selectedDoctor.specialty}
+                    </p>
                   </div>
 
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium text-muted-foreground">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
                       Years of Experience
-                    </h4>
-                    <p className="text-white">
+                    </p>
+                    <p className="text-foreground">
                       {selectedDoctor.experience} years
                     </p>
                   </div>
 
-                  <div className="space-y-1 col-span-2">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Credentials
-                    </h4>
-                    <div className="flex items-center">
-                      <a
-                        href={selectedDoctor.credentialUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-emerald-400 hover:text-emerald-300 flex items-center"
-                      >
-                        View Credentials
-                        <ExternalLink className="h-4 w-4 ml-1" />
-                      </a>
-                    </div>
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-muted-foreground">Credentials</p>
+                    <a
+                      href={selectedDoctor.credentialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-primary hover:underline"
+                    >
+                      View Credentials
+                      <ExternalLink className="ml-1 h-4 w-4" />
+                    </a>
                   </div>
                 </div>
               </div>
 
-              <Separator className="bg-emerald-900/20" />
+              <Separator />
 
-              {/* Description */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-emerald-400" />
-                  <h3 className="text-white font-medium">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <h3 className="font-medium text-foreground">
                     Service Description
                   </h3>
                 </div>
@@ -233,26 +198,25 @@ export function PendingDoctors({ doctors }) {
               </div>
             </div>
 
-            {loading && <BarLoader width={"100%"} color="#36d7b7" />}
+            {loading && <BarLoader width="100%" color="#36d7b7" />}
 
-            <DialogFooter className="flex sm:justify-between">
+            <DialogFooter className="flex justify-between">
               <Button
                 variant="destructive"
+                disabled={loading}
                 onClick={() =>
                   handleUpdateStatus(selectedDoctor.id, "REJECTED")
                 }
-                disabled={loading}
-                className="bg-red-600 hover:bg-red-700"
               >
                 <X className="mr-2 h-4 w-4" />
                 Reject
               </Button>
+
               <Button
+                disabled={loading}
                 onClick={() =>
                   handleUpdateStatus(selectedDoctor.id, "VERIFIED")
                 }
-                disabled={loading}
-                className="bg-emerald-600 hover:bg-emerald-700"
               >
                 <Check className="mr-2 h-4 w-4" />
                 Approve
