@@ -39,8 +39,49 @@
 //   ],
 // };
 
+// import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+// import { NextResponse } from 'next/server';
+
+// const isProtectedRoute = createRouteMatcher([
+//   '/counselors(.*)',
+//   '/onboarding(.*)',
+//   '/counselor(.*)',
+//   '/admin(.*)',
+//   '/video-call(.*)',
+//   '/appointments(.*)',
+//   '/resources(.*)',
+//   '/testimonials(.*)',
+//   '/about(.*)',
+//   '/contact(.*)',
+// ]);
+
+// export default clerkMiddleware((auth, req) => {
+//   const { userId } = auth(); // ✅ DO NOT await
+
+//   if (!userId && isProtectedRoute(req)) {
+//     const returnTo = encodeURIComponent(
+//       req.nextUrl.pathname + req.nextUrl.search
+//     );
+
+//     return NextResponse.redirect(
+//       new URL(`/sign-in?returnTo=${returnTo}`, req.url)
+//     );
+//   }
+
+//   const response = NextResponse.next();
+//   response.headers.set('x-pathname', req.nextUrl.pathname);
+//   return response;
+// });
+
+// export const config = {
+//   matcher: [
+//     // Run middleware on app + api routes, but not on next internals / static assets
+//     '/((?!_next/static|_next/image|favicon.ico|assets|.*\\..*).*)',
+//     '/(api|trpc)(.*)',
+//   ],
+// };
+
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/counselors(.*)',
@@ -56,27 +97,16 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  const { userId } = auth(); // ✅ DO NOT await
-
-  if (!userId && isProtectedRoute(req)) {
-    const returnTo = encodeURIComponent(
-      req.nextUrl.pathname + req.nextUrl.search
-    );
-
-    return NextResponse.redirect(
-      new URL(`/sign-in?returnTo=${returnTo}`, req.url)
-    );
+  // If it's a protected route, use Clerk's built-in protect()
+  // This handles authentication properly without manual redirects
+  if (isProtectedRoute(req)) {
+    auth().protect();
   }
-
-  const response = NextResponse.next();
-  response.headers.set('x-pathname', req.nextUrl.pathname);
-  return response;
 });
 
 export const config = {
   matcher: [
-    // Run middleware on app + api routes, but not on next internals / static assets
-    '/((?!_next/static|_next/image|favicon.ico|assets|.*\\..*).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|_next).*)',
     '/(api|trpc)(.*)',
   ],
 };
