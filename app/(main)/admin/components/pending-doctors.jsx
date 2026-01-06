@@ -125,7 +125,7 @@ export function PendingDoctors({ doctors }) {
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
                   ["Full Name", selectedDoctor.name],
                   ["Email", selectedDoctor.email],
@@ -136,7 +136,9 @@ export function PendingDoctors({ doctors }) {
                 ].map(([label, value]) => (
                   <div key={label}>
                     <p className="text-sm text-muted-foreground">{label}</p>
-                    <p className="font-medium text-foreground">{value}</p>
+                    <p className="font-medium text-foreground break-words leading-snug">
+                      {value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -154,7 +156,7 @@ export function PendingDoctors({ doctors }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Specialty</p>
-                    <p className="text-foreground">
+                    <p className="text-foreground break-words leading-snug">
                       {selectedDoctor.specialty}
                     </p>
                   </div>
