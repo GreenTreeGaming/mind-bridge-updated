@@ -24,7 +24,10 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL(`/sign-in?returnTo=${returnTo}`, req.url));
   }
 
-  return NextResponse.next();
+  // Add pathname to headers for active link detection
+  const response = NextResponse.next();
+  response.headers.set('x-pathname', req.nextUrl.pathname);
+  return response;
 });
 
 export const config = {

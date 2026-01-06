@@ -1,67 +1,47 @@
+import { Card, CardContent } from "@/components/ui/card";
 import { getCounselorById } from "@/actions/counselors";
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Award, MessageSquare, User, ArrowLeft, Clock } from "lucide-react";
+import {
+  Calendar,
+  Award,
+  MessageSquare,
+  User,
+  ArrowLeft,
+  Clock,
+} from "lucide-react";
 import Link from "next/link";
 
 export default async function CounselorProfilePage({ params }) {
-  // Await params in Next.js 15+
   const { counselorId } = await params;
-  
-  const counselor = await getCounselorById(counselorId);
 
+  const counselor = await getCounselorById(counselorId);
   if (!counselor) notFound();
 
   // Group availability by date
-  const availabilityByDate = counselor.availabilities?.reduce((acc, slot) => {
-    const date = new Date(slot.startTime);
-    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(slot);
-    return acc;
-  }, {}) || {};
+  const availabilityByDate =
+    counselor.availabilities?.reduce((acc, slot) => {
+      const dateKey = new Date(slot.startTime)
+        .toISOString()
+        .split("T")[0];
+      acc[dateKey] ||= [];
+      acc[dateKey].push(slot);
+      return acc;
+    }, {}) || {};
 
-  // Sort dates
   const sortedDates = Object.keys(availabilityByDate).sort();
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const dateKey = date.toISOString().split('T')[0];
-    const todayKey = today.toISOString().split('T')[0];
-    const tomorrowKey = tomorrow.toISOString().split('T')[0];
-
-    if (dateKey === todayKey) return "Today";
-    if (dateKey === tomorrowKey) return "Tomorrow";
-
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'short', 
-      day: 'numeric' 
+  const formatTime = (d) =>
+    new Date(d).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
-  };
-
-  // Format time
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
 
   return (
     <div className="space-y-6">
-      {/* Back Button */}
+      {/* Back */}
       <Button
         asChild
         variant="ghost"
@@ -74,13 +54,12 @@ export default async function CounselorProfilePage({ params }) {
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT: Profile */}
+        {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
           {/* Header */}
-          <Card className="border-border">
+          <Card>
             <CardContent className="p-6 flex gap-6">
-              {/* Avatar */}
-              <div className="w-24 h-24 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-24 h-24 rounded-2xl bg-primary/10 border flex items-center justify-center overflow-hidden">
                 {counselor.imageUrl ? (
                   <img
                     src={counselor.imageUrl}
@@ -92,30 +71,21 @@ export default async function CounselorProfilePage({ params }) {
                 )}
               </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-extrabold text-foreground mb-1">
+              <div className="flex-1">
+                <h1 className="text-2xl font-extrabold">
                   {counselor.name}
                 </h1>
 
                 {counselor.specialty && (
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/10 border-primary/20 text-primary mb-2"
-                  >
+                  <Badge className="mt-2">
                     {counselor.specialty}
                   </Badge>
                 )}
 
                 {counselor.experience && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                    <Award className="h-4 w-4 text-primary" />
-                    <span>
-                      <span className="font-medium text-foreground">
-                        {counselor.experience}
-                      </span>{" "}
-                      year{counselor.experience !== 1 ? "s" : ""} of experience
-                    </span>
+                    <Award className="h-4 w-4" />
+                    {counselor.experience} years of experience
                   </div>
                 )}
               </div>
@@ -124,16 +94,13 @@ export default async function CounselorProfilePage({ params }) {
 
           {/* About */}
           {counselor.description && (
-            <Card className="border-border">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold text-foreground">
-                    About
-                  </h2>
+                  <MessageSquare className="h-5 w-5" />
+                  <h2 className="text-lg font-semibold">About</h2>
                 </div>
-
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground">
                   {counselor.description}
                 </p>
               </CardContent>
@@ -141,11 +108,11 @@ export default async function CounselorProfilePage({ params }) {
           )}
 
           {/* Availability */}
-          <Card className="border-border">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Clock className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">
+                <Clock className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">
                   Available Time Slots
                 </h2>
               </div>
@@ -153,76 +120,95 @@ export default async function CounselorProfilePage({ params }) {
               {sortedDates.length > 0 ? (
                 <div className="space-y-4">
                   {sortedDates.map((dateKey) => (
-                    <div key={dateKey} className="flex flex-col sm:flex-row sm:items-start gap-3 pb-4 border-b border-border last:border-0 last:pb-0">
-                      <div className="w-32 shrink-0">
-                        <p className="font-medium text-foreground">
-                          {formatDate(dateKey)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(dateKey).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-2">
-                          {availabilityByDate[dateKey]
-                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                            .map((slot) => (
-                              <Badge
-                                key={slot.id}
-                                variant="outline"
-                                className="bg-primary/5 border-primary/20 text-foreground font-normal"
-                              >
-                                {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                              </Badge>
-                            ))}
-                        </div>
+                    <div
+                      key={dateKey}
+                      className="rounded-2xl border p-4"
+                    >
+                      <p className="font-semibold mb-2">
+                        {new Date(dateKey).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "long",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {availabilityByDate[dateKey]
+                          .sort(
+                            (a, b) =>
+                              new Date(a.startTime) -
+                              new Date(b.startTime)
+                          )
+                          .map((slot) => (
+                            <div
+                              key={slot.id}
+                              className="
+                                flex items-center gap-2
+                                rounded-full
+                                border border-primary/30
+                                bg-primary/5
+                                px-4 py-2
+                                text-sm
+                              "
+                            >
+                              <Clock className="h-3.5 w-3.5 text-primary" />
+                              <span className="font-medium">
+                                {formatTime(slot.startTime)}
+                              </span>
+                              <span className="text-muted-foreground">–</span>
+                              <span className="font-medium">
+                                {formatTime(slot.endTime)}
+                              </span>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-muted/30 rounded-lg">
-                  <Clock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    No upcoming availability at this time.
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Check back later or contact the counselor directly.
-                  </p>
-                </div>
+                <p className="text-muted-foreground text-sm">
+                  No upcoming availability.
+                </p>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* RIGHT: Booking CTA */}
+        {/* RIGHT CTA */}
         <div className="space-y-6">
-          <Card className="border-border sticky top-24">
+          <Card className="sticky top-24">
             <CardContent className="p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-lg font-semibold">
                 Book an Appointment
               </h3>
 
               <p className="text-sm text-muted-foreground">
                 Schedule a private session with{" "}
-                <span className="font-medium text-foreground">
+                <span className="font-medium">
                   {counselor.name}
-                </span>.
+                </span>
+                .
               </p>
 
-              <Button 
-                className="w-full h-11 rounded-xl"
-                disabled={!counselor.availabilities || counselor.availabilities.length === 0}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                {counselor.availabilities && counselor.availabilities.length > 0 
-                  ? "Book Session" 
-                  : "No Availability"}
-              </Button>
+              {counselor.availabilities?.length > 0 ? (
+                <Button asChild className="w-full h-11 rounded-xl">
+                  <Link href={`/counselors/${counselor.id}/book`}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Book Session
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  className="w-full h-11 rounded-xl"
+                  disabled
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  No Availability
+                </Button>
+              )}
 
               <p className="text-xs text-muted-foreground text-center">
                 Secure · Confidential · Online

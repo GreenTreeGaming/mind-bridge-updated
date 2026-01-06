@@ -1,14 +1,17 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Calendar, Clock, DollarSign } from "lucide-react";
+import { Calendar, Clock, BookOpen } from "lucide-react";
 import DoctorAppointmentsList from "./appointment-list";
 import { AvailabilitySettings } from "./availability-settings";
-import { DoctorEarnings } from "./doctor-earnings";
+import { Blogs } from "./blogs";
 
-export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
+export function DoctorDashboard({ appointments, slots }) {
   return (
-    <Tabs defaultValue="earnings" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <Tabs
+      defaultValue="appointments"
+      className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+    >
       {/* Sidebar */}
       <aside className="lg:col-span-3 lg:sticky lg:top-24 h-fit">
         <div className="rounded-3xl border border-border bg-background/70 backdrop-blur shadow-sm">
@@ -18,8 +21,7 @@ export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
             </p>
           </div>
 
-
-          {/* IMPORTANT: TabsList should ONLY contain TabsTrigger children */}
+          {/* Tabs */}
           <TabsList
             className="
               w-full bg-transparent p-2 h-auto
@@ -28,25 +30,7 @@ export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
               [scrollbar-width:none] [-ms-overflow-style:none]
             "
           >
-            <TabsTrigger
-              value="earnings"
-              className="
-                flex items-center justify-center lg:justify-start gap-2
-                whitespace-nowrap
-                rounded-2xl
-                px-4 py-3
-                text-sm font-medium
-                text-foreground/70
-                hover:bg-muted/70 hover:text-foreground
-                data-[state=active]:bg-emerald-600
-                data-[state=active]:text-white
-                data-[state=active]:shadow-sm
-              "
-            >
-              <DollarSign className="h-4 w-4" />
-              <span>Earnings</span>
-            </TabsTrigger>
-
+            {/* Appointments */}
             <TabsTrigger
               value="appointments"
               className="
@@ -66,6 +50,7 @@ export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
               <span>Appointments</span>
             </TabsTrigger>
 
+            {/* Availability */}
             <TabsTrigger
               value="availability"
               className="
@@ -84,15 +69,34 @@ export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
               <Clock className="h-4 w-4" />
               <span>Availability</span>
             </TabsTrigger>
+
+            {/* Blogs */}
+            <TabsTrigger
+              value="blogs"
+              className="
+                flex items-center justify-center lg:justify-start gap-2
+                whitespace-nowrap
+                rounded-2xl
+                px-4 py-3
+                text-sm font-medium
+                text-foreground/70
+                hover:bg-muted/70 hover:text-foreground
+                data-[state=active]:bg-emerald-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+              "
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Blogs</span>
+            </TabsTrigger>
           </TabsList>
 
           <div className="px-6 pb-6 pt-4">
             <div className="h-px bg-border mb-4" />
             <p className="text-xs text-foreground/60 leading-relaxed">
-              Use the tabs to manage your practice—earnings, upcoming sessions, and availability.
+              Manage appointments, availability, and your published articles.
             </p>
           </div>
-
         </div>
       </aside>
 
@@ -106,8 +110,8 @@ export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
           <AvailabilitySettings slots={slots} />
         </TabsContent>
 
-        <TabsContent value="earnings" className="p-0 mt-0">
-          <DoctorEarnings earnings={earnings} payouts={payouts} />
+        <TabsContent value="blogs" className="p-0 mt-0">
+          <Blogs />
         </TabsContent>
       </main>
     </Tabs>

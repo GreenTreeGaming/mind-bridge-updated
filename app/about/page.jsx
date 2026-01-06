@@ -217,13 +217,10 @@ export default function AboutPage() {
           className="max-w-3xl mx-auto text-center space-y-4"
         >
           <p className="text-lg md:text-xl font-semibold text-foreground">
-            However you&apos;re arriving here—curious, overwhelmed, hopeful, or
-            unsure—you&apos;re welcome.
+            Wayzata High School in Plymouth, MN - Mind Bridge 2026
           </p>
           <p className="text-sm md:text-base text-foreground/70 leading-relaxed">
-            Our hope is that Mind Bridge can be one steady, reassuring place in
-            a noisy world: a reminder that what you&apos;re feeling matters, and
-            that support is closer than it might seem.
+            Made by Sarvajith Karun, Shubham Panchal, Aaron Zou, and Siddharth Chakravarthula
           </p>
         </motion.section>
       </div>

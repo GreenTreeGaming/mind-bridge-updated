@@ -35,16 +35,30 @@ export async function getAllCounselors() {
 export async function getCounselorById(counselorId) {
   if (!counselorId) return null;
 
-  const counselor = await db.user.findUnique({
-    where: {
-      id: counselorId,
-    },
-  });
+  try {
+    const counselor = await db.user.findFirst({
+      where: {
+        id: counselorId,
+        role: "DOCTOR",
+      },
+      include: {
+        availabilities: {
+          where: {
+            status: "AVAILABLE",
+            startTime: {
+              gte: new Date(),
+            },
+          },
+          orderBy: {
+            startTime: "asc",
+          },
+        },
+      },
+    });
 
-  // Optional safety check
-  if (!counselor || counselor.role !== "DOCTOR") {
+    return counselor;
+  } catch (err) {
+    console.error("Failed to fetch counselor:", err);
     return null;
   }
-
-  return counselor;
 }

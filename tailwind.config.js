@@ -36,7 +36,7 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        sans: ["var(--font-lexend-deca)", "system-ui", "sans-serif"],
       },
       keyframes: {
         floaty: {

@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, HeartPulse } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Book, BookOpen, Brain, HeartPulse } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mentalHealthResources } from "@/lib/data";
@@ -137,6 +137,7 @@ export default function ResourcesPage() {
                   </ul>
 
                   <Button
+                    asChild
                     variant="outline"
                     size="sm"
                     className="
@@ -148,7 +149,10 @@ export default function ResourcesPage() {
                       hover:border-primary/40
                     "
                   >
-                    Explore this topic
+                    <Link href={item.link} className="flex items-center">
+                      <Book className="h-4 w-4 mr-2" />
+                      Explore This Topic
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
