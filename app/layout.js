@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 import Header from "@/components/ui/header.jsx";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
         <Header />
 
         <main className="min-h-screen">{children}</main>
+        <ThemeToggle /> 
         <Toaster richColors position="top-right" />
 
         {/*Footer*/}

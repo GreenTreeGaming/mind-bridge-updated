@@ -8,49 +8,108 @@ import { DoctorEarnings } from "./doctor-earnings";
 
 export function DoctorDashboard({ appointments, slots, earnings, payouts }) {
   return (
-    <Tabs
-      defaultValue="earnings"
-      className="grid grid-cols-1 md:grid-cols-4 gap-6"
-    >
-      <TabsList className="md:col-span-1 bg-muted/30 border h-14 md:h-40 flex sm:flex-row md:flex-col w-full p-2 md:p-1 rounded-md md:space-y-2 sm:space-x-2 md:space-x-0">
-        <TabsTrigger
-          value="earnings"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
-        >
-          <DollarSign className="h-4 w-4 mr-2 hidden md:inline" />
-          <span>Earnings</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="appointments"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
-        >
-          <Calendar className="h-4 w-4 mr-2 hidden md:inline" />
-          <span>Appointments</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="availability"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
-        >
-          <Clock className="h-4 w-4 mr-2 hidden md:inline" />
-          <span>Availability</span>
-        </TabsTrigger>
-      </TabsList>
-      <div className="md:col-span-3">
-        <TabsContent value="appointments" className="border-none p-0">
-          <DoctorAppointmentsList
-            appointments={appointments}
-          />
+    <Tabs defaultValue="earnings" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Sidebar */}
+      <aside className="lg:col-span-3 lg:sticky lg:top-24 h-fit">
+        <div className="rounded-3xl border border-border bg-background/70 backdrop-blur shadow-sm">
+          <div className="px-6 pt-6 pb-4">
+            <p className="text-xs font-semibold tracking-wide uppercase text-foreground/50">
+              Dashboard
+            </p>
+          </div>
+
+
+          {/* IMPORTANT: TabsList should ONLY contain TabsTrigger children */}
+          <TabsList
+            className="
+              w-full bg-transparent p-2 h-auto
+              flex lg:flex-col gap-2
+              overflow-x-auto lg:overflow-visible
+              [scrollbar-width:none] [-ms-overflow-style:none]
+            "
+          >
+            <TabsTrigger
+              value="earnings"
+              className="
+                flex items-center justify-center lg:justify-start gap-2
+                whitespace-nowrap
+                rounded-2xl
+                px-4 py-3
+                text-sm font-medium
+                text-foreground/70
+                hover:bg-muted/70 hover:text-foreground
+                data-[state=active]:bg-emerald-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+              "
+            >
+              <DollarSign className="h-4 w-4" />
+              <span>Earnings</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="appointments"
+              className="
+                flex items-center justify-center lg:justify-start gap-2
+                whitespace-nowrap
+                rounded-2xl
+                px-4 py-3
+                text-sm font-medium
+                text-foreground/70
+                hover:bg-muted/70 hover:text-foreground
+                data-[state=active]:bg-emerald-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+              "
+            >
+              <Calendar className="h-4 w-4" />
+              <span>Appointments</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="availability"
+              className="
+                flex items-center justify-center lg:justify-start gap-2
+                whitespace-nowrap
+                rounded-2xl
+                px-4 py-3
+                text-sm font-medium
+                text-foreground/70
+                hover:bg-muted/70 hover:text-foreground
+                data-[state=active]:bg-emerald-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+              "
+            >
+              <Clock className="h-4 w-4" />
+              <span>Availability</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="px-6 pb-6 pt-4">
+            <div className="h-px bg-border mb-4" />
+            <p className="text-xs text-foreground/60 leading-relaxed">
+              Use the tabs to manage your practice—earnings, upcoming sessions, and availability.
+            </p>
+          </div>
+
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="lg:col-span-9 min-w-0">
+        <TabsContent value="appointments" className="p-0 mt-0">
+          <DoctorAppointmentsList appointments={appointments} />
         </TabsContent>
-        <TabsContent value="availability" className="border-none p-0">
+
+        <TabsContent value="availability" className="p-0 mt-0">
           <AvailabilitySettings slots={slots} />
         </TabsContent>
-        <TabsContent value="earnings" className="border-none p-0">
-          <DoctorEarnings
-            earnings={earnings}
-            payouts={payouts}
-          />
+
+        <TabsContent value="earnings" className="p-0 mt-0">
+          <DoctorEarnings earnings={earnings} payouts={payouts} />
         </TabsContent>
-      </div>
+      </main>
     </Tabs>
   );
 }

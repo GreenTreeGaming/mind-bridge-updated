@@ -22,7 +22,7 @@ export default async function DoctorDashboardPage() {
 
   // If already verified, redirect to dashboard
   if (user?.verificationStatus !== "VERIFIED") {
-    redirect("/doctor/verification");
+    redirect("/counselor/verification");
   }
 
   return (

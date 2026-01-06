@@ -32,3 +32,19 @@ export async function getAllCounselors() {
   }
 }
 
+export async function getCounselorById(counselorId) {
+  if (!counselorId) return null;
+
+  const counselor = await db.user.findUnique({
+    where: {
+      id: counselorId,
+    },
+  });
+
+  // Optional safety check
+  if (!counselor || counselor.role !== "DOCTOR") {
+    return null;
+  }
+
+  return counselor;
+}

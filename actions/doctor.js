@@ -15,7 +15,6 @@ export async function setAvailabilitySlots(formData) {
   }
 
   try {
-    // Get the doctor
     const doctor = await db.user.findUnique({
       where: {
         clerkUserId: userId,
@@ -27,11 +26,10 @@ export async function setAvailabilitySlots(formData) {
       throw new Error("Doctor not found");
     }
 
-    // Get form data
     const startTime = formData.get("startTime");
     const endTime = formData.get("endTime");
+    const daysCount = parseInt(formData.get("daysCount") || "1");
 
-    // Validate input
     if (!startTime || !endTime) {
       throw new Error("Start time and end time are required");
     }
@@ -40,43 +38,40 @@ export async function setAvailabilitySlots(formData) {
       throw new Error("Start time must be before end time");
     }
 
-    // Check if the doctor already has slots
-    const existingSlots = await db.availability.findMany({
+    // Delete existing future slots
+    await db.availability.deleteMany({
       where: {
         doctorId: doctor.id,
+        startTime: {
+          gte: new Date(),
+        },
       },
     });
 
-    // If slots exist, delete them all (we're replacing them)
-    if (existingSlots.length > 0) {
-      // Don't delete slots that already have appointments
-      const slotsWithNoAppointments = existingSlots.filter(
-        (slot) => !slot.appointment
-      );
+    // Create slots for multiple days in one transaction
+    const slotsToCreate = [];
+    for (let i = 0; i < daysCount; i++) {
+      const slotStart = new Date(startTime);
+      slotStart.setDate(slotStart.getDate() + i);
+      
+      const slotEnd = new Date(endTime);
+      slotEnd.setDate(slotEnd.getDate() + i);
 
-      if (slotsWithNoAppointments.length > 0) {
-        await db.availability.deleteMany({
-          where: {
-            id: {
-              in: slotsWithNoAppointments.map((slot) => slot.id),
-            },
-          },
-        });
-      }
+      slotsToCreate.push({
+        doctorId: doctor.id,
+        startTime: slotStart,
+        endTime: slotEnd,
+        status: "AVAILABLE",
+      });
     }
 
-    // Create new availability slot
-    const newSlot = await db.availability.create({
-      data: {
-        doctorId: doctor.id,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        status: "AVAILABLE",
-      },
+    // Create all slots in one operation
+    await db.availability.createMany({
+      data: slotsToCreate,
     });
 
     revalidatePath("/counselor");
-    return { success: true, slot: newSlot };
+    return { success: true, count: slotsToCreate.length };
   } catch (error) {
     console.error("Failed to set availability slots:", error);
     throw new Error("Failed to set availability: " + error.message);
