@@ -20,6 +20,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
   setAvailabilitySlots,
   deleteAvailabilitySlot,
@@ -30,6 +31,12 @@ import { toast } from "sonner";
 
 export function AvailabilitySettings({ slots }) {
   const [showForm, setShowForm] = useState(false);
+  const [userTimezone, setUserTimezone] = useState("America/Chicago");
+
+  useEffect(() => {
+    // Detect user's timezone on mount
+    setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, []);
 
   const { loading, fn: submitSlots, data } = useFetch(setAvailabilitySlots);
   const { loading: deletingOne, fn: removeSlot } =
@@ -62,23 +69,25 @@ export function AvailabilitySettings({ slots }) {
 
     const { date, startTime, endTime } = data;
 
-    const start = new Date(`${date}T${startTime}`);
-    const end = new Date(`${date}T${endTime}`);
+    // Create dates in the user's local timezone, then convert to UTC
+    const startLocal = new Date(`${date}T${startTime}`);
+    const endLocal = new Date(`${date}T${endTime}`);
     const now = new Date();
 
-    if (start >= end) {
+    if (startLocal >= endLocal) {
       toast.error("End time must be after start time");
       return;
     }
 
-    if (start <= now || end <= now) {
+    if (startLocal <= now || endLocal <= now) {
       toast.error("Availability must be in the future");
       return;
     }
 
     const formData = new FormData();
-    formData.append("startTime", start.toISOString());
-    formData.append("endTime", end.toISOString());
+    // toISOString() already converts to UTC correctly
+    formData.append("startTime", startLocal.toISOString());
+    formData.append("endTime", endLocal.toISOString());
 
     await submitSlots(formData);
   };
@@ -86,15 +95,39 @@ export function AvailabilitySettings({ slots }) {
   useEffect(() => {
     if (data?.success) {
       toast.success("Availability added");
-      reset(); // allow quick adding multiple slots
+      reset();
     }
   }, [data, reset]);
 
-  const formatTime = (d) => format(new Date(d), "h:mm a");
-  const formatDate = (d) => format(new Date(d), "MMM d, yyyy");
+  // Format times in the user's local timezone
+  const formatTime = (d) => {
+    return new Date(d).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: userTimezone
+    });
+  };
 
+  const formatDate = (d) => {
+    return new Date(d).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: userTimezone
+    });
+  };
+
+  // Group slots by date in user's timezone
   const slotsByDate = slots.reduce((acc, slot) => {
-    const key = format(new Date(slot.startTime), "yyyy-MM-dd");
+    const localDate = new Date(slot.startTime).toLocaleDateString('en-US', {
+      timeZone: userTimezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const [month, day, year] = localDate.split('/');
+    const key = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     acc[key] ||= [];
     acc[key].push(slot);
     return acc;
@@ -261,7 +294,7 @@ export function AvailabilitySettings({ slots }) {
             <AlertCircle className="h-5 w-5 text-emerald-600" />
             <p className="text-sm text-muted-foreground">
               You can add multiple availability slots across different days.
-              Overlapping times are prevented automatically.
+              Overlapping times are prevented automatically. All times are in your local timezone.
             </p>
           </div>
         </div>
