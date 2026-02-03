@@ -20,7 +20,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
-import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
   setAvailabilitySlots,
   deleteAvailabilitySlot,
@@ -31,12 +30,6 @@ import { toast } from "sonner";
 
 export function AvailabilitySettings({ slots }) {
   const [showForm, setShowForm] = useState(false);
-  const [userTimezone, setUserTimezone] = useState("America/Chicago");
-
-  useEffect(() => {
-    // Detect user's timezone on mount
-    setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  }, []);
 
   const { loading, fn: submitSlots, data } = useFetch(setAvailabilitySlots);
   const { loading: deletingOne, fn: removeSlot } =
@@ -69,9 +62,18 @@ export function AvailabilitySettings({ slots }) {
 
     const { date, startTime, endTime } = data;
 
-    // Create dates in the user's local timezone, then convert to UTC
-    const startLocal = new Date(`${date}T${startTime}`);
-    const endLocal = new Date(`${date}T${endTime}`);
+    // Parse the time inputs (they're in 24-hour format: "06:00", "07:00")
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    // Create dates using the selected date and parsed time components
+    // This ensures we're working in local time
+    const startLocal = new Date(date);
+    startLocal.setHours(startHour, startMinute, 0, 0);
+
+    const endLocal = new Date(date);
+    endLocal.setHours(endHour, endMinute, 0, 0);
+
     const now = new Date();
 
     if (startLocal >= endLocal) {
@@ -85,7 +87,7 @@ export function AvailabilitySettings({ slots }) {
     }
 
     const formData = new FormData();
-    // toISOString() already converts to UTC correctly
+    // toISOString() converts the local time to UTC for storage
     formData.append("startTime", startLocal.toISOString());
     formData.append("endTime", endLocal.toISOString());
 
@@ -105,7 +107,6 @@ export function AvailabilitySettings({ slots }) {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-      timeZone: userTimezone
     });
   };
 
@@ -114,20 +115,17 @@ export function AvailabilitySettings({ slots }) {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      timeZone: userTimezone
     });
   };
 
   // Group slots by date in user's timezone
   const slotsByDate = slots.reduce((acc, slot) => {
-    const localDate = new Date(slot.startTime).toLocaleDateString('en-US', {
-      timeZone: userTimezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
-    const [month, day, year] = localDate.split('/');
-    const key = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const date = new Date(slot.startTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const key = `${year}-${month}-${day}`;
+    
     acc[key] ||= [];
     acc[key].push(slot);
     return acc;
