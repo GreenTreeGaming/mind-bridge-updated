@@ -6,13 +6,7 @@ import Link from "next/link";
 
 export function TimeSlotSelector({ availabilities, counselorId }) {
   // Helper to parse database timestamp as UTC
-  const parseUTC = (dateString) => {
-    // If the string doesn't have timezone info, treat it as UTC
-    if (dateString && !dateString.includes('Z') && !dateString.includes('+')) {
-      return new Date(dateString + 'Z');
-    }
-    return new Date(dateString);
-  };
+  const parseUTC = (dateString) => new Date(dateString);
 
   // Helper to format time in user's local timezone (client-side)
   const formatTime = (dateString) => {

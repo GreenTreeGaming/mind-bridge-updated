@@ -102,13 +102,7 @@ export function AvailabilitySettings({ slots }) {
   }, [data, reset]);
 
   // Format times in the user's local timezone
-  const parseUTC = (dateString) => {
-    // If the string doesn't have timezone info, treat it as UTC
-    if (dateString && !dateString.includes('Z') && !dateString.includes('+')) {
-      return new Date(dateString + 'Z');
-    }
-    return new Date(dateString);
-  };
+  const parseUTC = (dateString) => new Date(dateString);
 
   const formatTime = (d) => {
     return parseUTC(d).toLocaleTimeString('en-US', {
@@ -133,7 +127,7 @@ export function AvailabilitySettings({ slots }) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const key = `${year}-${month}-${day}`;
-    
+
     acc[key] ||= [];
     acc[key].push(slot);
     return acc;
