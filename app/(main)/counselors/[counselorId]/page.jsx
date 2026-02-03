@@ -19,25 +19,47 @@ export default async function CounselorProfilePage({ params }) {
   const counselor = await getCounselorById(counselorId);
   if (!counselor) notFound();
 
-  // Group availability by date
+  // Helper to format time in user's local timezone
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+  };
+
+  // Helper to format date in user's local timezone
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+  };
+
+  // Helper to get date key in user's local timezone
+  const getLocalDateKey = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }).split('/').reverse().join('-'); // Convert MM/DD/YYYY to YYYY-MM-DD
+  };
+
+  // Group availability by date in LOCAL timezone
   const availabilityByDate =
     counselor.availabilities?.reduce((acc, slot) => {
-      const dateKey = new Date(slot.startTime)
-        .toISOString()
-        .split("T")[0];
+      const dateKey = getLocalDateKey(slot.startTime);
       acc[dateKey] ||= [];
       acc[dateKey].push(slot);
       return acc;
     }, {}) || {};
 
   const sortedDates = Object.keys(availabilityByDate).sort();
-
-  const formatTime = (d) =>
-    new Date(d).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
 
   return (
     <div className="space-y-6">
@@ -125,14 +147,7 @@ export default async function CounselorProfilePage({ params }) {
                       className="rounded-2xl border p-4"
                     >
                       <p className="font-semibold mb-2">
-                        {new Date(dateKey).toLocaleDateString(
-                          "en-US",
-                          {
-                            weekday: "long",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
+                        {formatDate(availabilityByDate[dateKey][0].startTime)}
                       </p>
 
                       <div className="flex flex-wrap gap-2">
