@@ -12,54 +12,13 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { AvailabilityDisplay } from "@/components/availability-display";
 
 export default async function CounselorProfilePage({ params }) {
   const { counselorId } = await params;
 
   const counselor = await getCounselorById(counselorId);
   if (!counselor) notFound();
-
-  // Helper to format time in user's local timezone
-  const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-  };
-
-  // Helper to format date in user's local timezone
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-  };
-
-  // Helper to get date key in user's local timezone
-  const getLocalDateKey = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    }).split('/').reverse().join('-'); // Convert MM/DD/YYYY to YYYY-MM-DD
-  };
-
-  // Group availability by date in LOCAL timezone
-  const availabilityByDate =
-    counselor.availabilities?.reduce((acc, slot) => {
-      const dateKey = getLocalDateKey(slot.startTime);
-      acc[dateKey] ||= [];
-      acc[dateKey].push(slot);
-      return acc;
-    }, {}) || {};
-
-  const sortedDates = Object.keys(availabilityByDate).sort();
 
   return (
     <div className="space-y-6">
@@ -139,55 +98,7 @@ export default async function CounselorProfilePage({ params }) {
                 </h2>
               </div>
 
-              {sortedDates.length > 0 ? (
-                <div className="space-y-4">
-                  {sortedDates.map((dateKey) => (
-                    <div
-                      key={dateKey}
-                      className="rounded-2xl border p-4"
-                    >
-                      <p className="font-semibold mb-2">
-                        {formatDate(availabilityByDate[dateKey][0].startTime)}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2">
-                        {availabilityByDate[dateKey]
-                          .sort(
-                            (a, b) =>
-                              new Date(a.startTime) -
-                              new Date(b.startTime)
-                          )
-                          .map((slot) => (
-                            <div
-                              key={slot.id}
-                              className="
-                                flex items-center gap-2
-                                rounded-full
-                                border border-primary/30
-                                bg-primary/5
-                                px-4 py-2
-                                text-sm
-                              "
-                            >
-                              <Clock className="h-3.5 w-3.5 text-primary" />
-                              <span className="font-medium">
-                                {formatTime(slot.startTime)}
-                              </span>
-                              <span className="text-muted-foreground">–</span>
-                              <span className="font-medium">
-                                {formatTime(slot.endTime)}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  No upcoming availability.
-                </p>
-              )}
+              <AvailabilityDisplay availabilities={counselor.availabilities} />
             </CardContent>
           </Card>
         </div>

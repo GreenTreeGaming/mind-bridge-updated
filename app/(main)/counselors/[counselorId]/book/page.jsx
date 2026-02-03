@@ -2,9 +2,10 @@ import { getCounselorById } from "@/actions/counselors";
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, User, ArrowLeft, Calendar } from "lucide-react";
+import { User, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { BookingConfirmation } from "@/components/booking-confirmation";
+import { TimeSlotSelector } from "@/components/time-slot-selector";
 
 export default async function BookSessionPage({ params, searchParams }) {
   const { counselorId } = await params;
@@ -12,49 +13,6 @@ export default async function BookSessionPage({ params, searchParams }) {
 
   const counselor = await getCounselorById(counselorId);
   if (!counselor) notFound();
-
-  // Helper to format time in user's local timezone
-  const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-  };
-
-  // Helper to format date in user's local timezone
-  const formatDateLong = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-  };
-
-  // Helper to get date key in user's local timezone
-  const getLocalDateKey = (dateString) => {
-    const date = new Date(dateString);
-    const parts = date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    }).split('/');
-    return `${parts[2]}-${parts[0]}-${parts[1]}`; // Convert MM/DD/YYYY to YYYY-MM-DD
-  };
-
-  // Group availability by date in LOCAL timezone
-  const availabilityByDate =
-    counselor.availabilities?.reduce((acc, slot) => {
-      const dateKey = getLocalDateKey(slot.startTime);
-      acc[dateKey] ||= [];
-      acc[dateKey].push(slot);
-      return acc;
-    }, {}) || {};
-
-  const sortedDates = Object.keys(availabilityByDate).sort();
 
   // No slot selected → show time slot selection
   if (!slotId) {
@@ -77,66 +35,10 @@ export default async function BookSessionPage({ params, searchParams }) {
               </div>
             </div>
 
-            {counselor.availabilities?.length > 0 ? (
-              <div className="space-y-4">
-                <label className="text-sm font-medium">
-                  Select an available time slot
-                </label>
-
-                <div className="space-y-4">
-                  {sortedDates.map((dateKey) => (
-                    <div key={dateKey} className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        {formatDateLong(availabilityByDate[dateKey][0].startTime)}
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {availabilityByDate[dateKey]
-                          .sort(
-                            (a, b) =>
-                              new Date(a.startTime) - new Date(b.startTime)
-                          )
-                          .map((slot) => (
-                            <Button
-                              key={slot.id}
-                              asChild
-                              variant="outline"
-                              className="h-auto py-3 flex-col items-start gap-1"
-                            >
-                              <Link
-                                href={`/counselors/${counselorId}/book?slotId=${slot.id}`}
-                              >
-                                <div className="flex items-center gap-2 w-full">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  <span className="font-medium text-sm">
-                                    {formatTime(slot.startTime)}
-                                  </span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  to {formatTime(slot.endTime)}
-                                </span>
-                              </Link>
-                            </Button>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  No available time slots at the moment.
-                </p>
-                <Button asChild variant="ghost" className="mt-4">
-                  <Link href={`/counselors/${counselorId}`}>
-                    Back to Profile
-                  </Link>
-                </Button>
-              </div>
-            )}
+            <TimeSlotSelector 
+              availabilities={counselor.availabilities}
+              counselorId={counselorId}
+            />
           </CardContent>
         </Card>
       </div>
