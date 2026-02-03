@@ -13,17 +13,42 @@ export default async function BookSessionPage({ params, searchParams }) {
   const counselor = await getCounselorById(counselorId);
   if (!counselor) notFound();
 
-  const formatTime = (d) =>
-    new Date(d).toLocaleTimeString("en-US", {
+  // Helper to format time in user's local timezone
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
+  };
 
-  // Group availability by date
+  // Helper to format date in user's local timezone
+  const formatDateLong = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+  };
+
+  // Helper to get date key in user's local timezone
+  const getLocalDateKey = (dateString) => {
+    const date = new Date(dateString);
+    const parts = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }).split('/');
+    return `${parts[2]}-${parts[0]}-${parts[1]}`; // Convert MM/DD/YYYY to YYYY-MM-DD
+  };
+
+  // Group availability by date in LOCAL timezone
   const availabilityByDate =
     counselor.availabilities?.reduce((acc, slot) => {
-      const dateKey = new Date(slot.startTime).toISOString().split("T")[0];
+      const dateKey = getLocalDateKey(slot.startTime);
       acc[dateKey] ||= [];
       acc[dateKey].push(slot);
       return acc;
@@ -63,11 +88,7 @@ export default async function BookSessionPage({ params, searchParams }) {
                     <div key={dateKey} className="space-y-3">
                       <div className="flex items-center gap-2 text-sm font-medium">
                         <Calendar className="h-4 w-4 text-primary" />
-                        {new Date(dateKey).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {formatDateLong(availabilityByDate[dateKey][0].startTime)}
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
