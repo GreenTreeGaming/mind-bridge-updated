@@ -102,8 +102,16 @@ export function AvailabilitySettings({ slots }) {
   }, [data, reset]);
 
   // Format times in the user's local timezone
+  const parseUTC = (dateString) => {
+    // If the string doesn't have timezone info, treat it as UTC
+    if (dateString && !dateString.includes('Z') && !dateString.includes('+')) {
+      return new Date(dateString + 'Z');
+    }
+    return new Date(dateString);
+  };
+
   const formatTime = (d) => {
-    return new Date(d).toLocaleTimeString('en-US', {
+    return parseUTC(d).toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
@@ -111,7 +119,7 @@ export function AvailabilitySettings({ slots }) {
   };
 
   const formatDate = (d) => {
-    return new Date(d).toLocaleDateString('en-US', {
+    return parseUTC(d).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -120,7 +128,7 @@ export function AvailabilitySettings({ slots }) {
 
   // Group slots by date in user's timezone
   const slotsByDate = slots.reduce((acc, slot) => {
-    const date = new Date(slot.startTime);
+    const date = parseUTC(slot.startTime);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

@@ -5,9 +5,18 @@ import { Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 
 export function TimeSlotSelector({ availabilities, counselorId }) {
+  // Helper to parse database timestamp as UTC
+  const parseUTC = (dateString) => {
+    // If the string doesn't have timezone info, treat it as UTC
+    if (dateString && !dateString.includes('Z') && !dateString.includes('+')) {
+      return new Date(dateString + 'Z');
+    }
+    return new Date(dateString);
+  };
+
   // Helper to format time in user's local timezone (client-side)
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return parseUTC(dateString).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -16,7 +25,7 @@ export function TimeSlotSelector({ availabilities, counselorId }) {
 
   // Helper to format date in user's local timezone (client-side)
   const formatDateLong = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return parseUTC(dateString).toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
@@ -25,7 +34,7 @@ export function TimeSlotSelector({ availabilities, counselorId }) {
 
   // Helper to get date key in user's local timezone (client-side)
   const getLocalDateKey = (dateString) => {
-    const date = new Date(dateString);
+    const date = parseUTC(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
@@ -69,7 +78,7 @@ export function TimeSlotSelector({ availabilities, counselorId }) {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {availabilityByDate[dateKey]
-                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                .sort((a, b) => parseUTC(a.startTime) - parseUTC(b.startTime))
                 .map((slot) => (
                   <Button
                     key={slot.id}
