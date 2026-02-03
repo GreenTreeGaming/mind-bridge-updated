@@ -56,7 +56,16 @@ export async function getCounselorById(counselorId) {
       },
     });
 
-    return counselor;
+    if (!counselor) return null;
+
+    return {
+      ...counselor,
+      availabilities: counselor.availabilities.map((slot) => ({
+        ...slot,
+        startTime: slot.startTime.toISOString(),
+        endTime: slot.endTime.toISOString(),
+      })),
+    };
   } catch (err) {
     console.error("Failed to fetch counselor:", err);
     return null;
