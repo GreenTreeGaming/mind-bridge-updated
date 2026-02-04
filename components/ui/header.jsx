@@ -46,8 +46,8 @@ export default async function Header() {
           <Link href="/about" className="hover:text-foreground transition">
             About
           </Link>
-          <Link href="/contact" className="hover:text-foreground transition">
-            Contact
+          <Link href="/helplines" className="hover:text-foreground transition">
+            Helplines
           </Link>
         </div>
 
@@ -131,8 +131,8 @@ export default async function Header() {
                 <Link href="/about" className="rounded-lg px-3 py-2 hover:bg-muted">
                   About
                 </Link>
-                <Link href="/contact" className="rounded-lg px-3 py-2 hover:bg-muted">
-                  Contact
+                <Link href="/helplines" className="rounded-lg px-3 py-2 hover:bg-muted">
+                  Helplines
                 </Link>
 
                 <div className="my-1 h-px bg-border" />

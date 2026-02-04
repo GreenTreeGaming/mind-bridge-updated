@@ -162,6 +162,9 @@ export default function MentalHealthHome() {
             alt="Peaceful meditation"
             className="w-full h-full object-cover"
           />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+            <p className="text-white text-sm">Photo by <a href="https://unsplash.com/@zacdurant" target="_blank" rel="noopener noreferrer" className="hover:underline">Zac Durant</a> on Unsplash</p>
+          </div>
 
           {/* Floating stats */}
           <div className="absolute inset-0 p-12 flex flex-col justify-end gap-4">
